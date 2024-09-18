@@ -1,0 +1,406 @@
+[
+  {
+    "name": "Ancestor's Chosen",
+    "type": "Creature — Human Cleric"
+  },
+  {
+    "name": "Angel of Mercy",
+    "type": "Creature — Angel"
+  },
+  {
+    "name": "Angelic Blessing",
+    "type": "Sorcery"
+  },
+  {
+    "name": "Angelic Chorus",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Angelic Wall",
+    "type": "Creature — Wall"
+  },
+  {
+    "name": "Aura of Silence",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Aven Cloudchaser",
+    "type": "Creature — Bird Soldier"
+  },
+  {
+    "name": "Ballista Squad",
+    "type": "Creature — Human Rebel"
+  },
+  {
+    "name": "Bandage",
+    "type": "Instant"
+  },
+  {
+    "name": "Beacon of Immortality",
+    "type": "Instant"
+  },
+  {
+    "name": "Benalish Knight",
+    "type": "Creature — Human Knight"
+  },
+  {
+    "name": "Cho-Manno, Revolutionary",
+    "type": "Legendary Creature — Human Rebel"
+  },
+  {
+    "name": "Condemn",
+    "type": "Instant"
+  },
+  {
+    "name": "Demystify",
+    "type": "Instant"
+  },
+  {
+    "name": "Field Marshal",
+    "type": "Creature — Human Soldier"
+  },
+  {
+    "name": "Ghost Warden",
+    "type": "Creature — Spirit"
+  },
+  {
+    "name": "Glorious Anthem",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Hail of Arrows",
+    "type": "Instant"
+  },
+  {
+    "name": "Heart of Light",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "High Ground",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Holy Day",
+    "type": "Instant"
+  },
+  {
+    "name": "Holy Strength",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Honor Guard",
+    "type": "Creature — Human Soldier"
+  },
+  {
+    "name": "Icatian Priest",
+    "type": "Creature — Human Cleric"
+  },
+  {
+    "name": "Kjeldoran Royal Guard",
+    "type": "Creature — Human Soldier"
+  },
+  {
+    "name": "Loxodon Mystic",
+    "type": "Creature — Elephant Cleric"
+  },
+  {
+    "name": "Loyal Sentry",
+    "type": "Creature — Human Soldier"
+  },
+  {
+    "name": "Luminesce",
+    "type": "Instant"
+  },
+  {
+    "name": "Mobilization",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Nomad Mythmaker",
+    "type": "Creature — Human Nomad Cleric"
+  },
+  {
+    "name": "Pacifism",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Paladin en-Vec",
+    "type": "Creature — Human Knight"
+  },
+  {
+    "name": "Pariah",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Reviving Dose",
+    "type": "Instant"
+  },
+  {
+    "name": "Reya Dawnbringer",
+    "type": "Legendary Creature — Angel"
+  },
+  {
+    "name": "Righteousness",
+    "type": "Instant"
+  },
+  {
+    "name": "Rule of Law",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Samite Healer",
+    "type": "Creature — Human Cleric"
+  },
+  {
+    "name": "Serra Angel",
+    "type": "Creature — Angel"
+  },
+  {
+    "name": "Serra's Embrace",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Skyhunter Patrol",
+    "type": "Creature — Cat Knight"
+  },
+  {
+    "name": "Skyhunter Prowler",
+    "type": "Creature — Cat Knight"
+  },
+  {
+    "name": "Skyhunter Skirmisher",
+    "type": "Creature — Cat Knight"
+  },
+  {
+    "name": "Soul Warden",
+    "type": "Creature — Human Cleric"
+  },
+  {
+    "name": "Spirit Link",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Spirit Weaver",
+    "type": "Creature — Human Wizard"
+  },
+  {
+    "name": "Starlight Invoker",
+    "type": "Creature — Human Cleric Mutant"
+  },
+  {
+    "name": "Steadfast Guard",
+    "type": "Creature — Human Rebel"
+  },
+  {
+    "name": "Story Circle",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Suntail Hawk",
+    "type": "Creature — Bird"
+  },
+  {
+    "name": "Tempest of Light",
+    "type": "Instant"
+  },
+  {
+    "name": "Treasure Hunter",
+    "type": "Creature — Human"
+  },
+  {
+    "name": "True Believer",
+    "type": "Creature — Human Cleric"
+  },
+  {
+    "name": "Tundra Wolves",
+    "type": "Creature — Wolf"
+  },
+  {
+    "name": "Venerable Monk",
+    "type": "Creature — Human Monk Cleric"
+  },
+  {
+    "name": "Voice of All",
+    "type": "Creature — Angel"
+  },
+  {
+    "name": "Wall of Swords",
+    "type": "Creature — Wall"
+  },
+  {
+    "name": "Warrior's Honor",
+    "type": "Instant"
+  },
+  {
+    "name": "Wild Griffin",
+    "type": "Creature — Griffin"
+  },
+  {
+    "name": "Windborn Muse",
+    "type": "Creature — Spirit"
+  },
+  {
+    "name": "Wrath of God",
+    "type": "Sorcery"
+  },
+  {
+    "name": "Youthful Knight",
+    "type": "Creature — Human Knight"
+  },
+  {
+    "name": "Animate Wall",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Armageddon",
+    "type": "Sorcery"
+  },
+  {
+    "name": "Balance",
+    "type": "Sorcery"
+  },
+  {
+    "name": "Benalish Hero",
+    "type": "Creature — Human Soldier"
+  },
+  {
+    "name": "Black Ward",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Blaze of Glory",
+    "type": "Instant"
+  },
+  {
+    "name": "Blessing",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Blue Ward",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Castle",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Circle of Protection: Black",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Circle of Protection: Blue",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Circle of Protection: Green",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Circle of Protection: Red",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Circle of Protection: White",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Consecrate Land",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Conversion",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Crusade",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Death Ward",
+    "type": "Instant"
+  },
+  {
+    "name": "Disenchant",
+    "type": "Instant"
+  },
+  {
+    "name": "Farmstead",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Green Ward",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Guardian Angel",
+    "type": "Instant"
+  },
+  {
+    "name": "Healing Salve",
+    "type": "Instant"
+  },
+  {
+    "name": "Holy Armor",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Island Sanctuary",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Karma",
+    "type": "Enchantment"
+  },
+  {
+    "name": "Lance",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Mesa Pegasus",
+    "type": "Creature — Pegasus"
+  },
+  {
+    "name": "Northern Paladin",
+    "type": "Creature — Human Knight"
+  },
+  {
+    "name": "Pearled Unicorn",
+    "type": "Creature — Unicorn"
+  },
+  {
+    "name": "Personal Incarnation",
+    "type": "Creature — Avatar Incarnation"
+  },
+  {
+    "name": "Purelace",
+    "type": "Instant"
+  },
+  {
+    "name": "Red Ward",
+    "type": "Enchantment — Aura"
+  },
+  {
+    "name": "Resurrection",
+    "type": "Sorcery"
+  },
+  {
+    "name": "Reverse Damage",
+    "type": "Instant"
+  },
+  {
+    "name": "Savannah Lions",
+    "type": "Creature — Cat"
+  },
+  {
+    "name": "Swords to Plowshares",
+    "type": "Instant"
+  },
+  {
+    "name": "Veteran Bodyguard",
+    "type": "Creature — Human"
+  },
+  {
+    "name": "White Knight",
+    "type": "Creature — Human Knight"
+  }
+]
