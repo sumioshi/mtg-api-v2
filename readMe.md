@@ -1,6 +1,6 @@
-## Documentação API Parte 02
+# Documentação API Parte 02
 
-# Todas as rotas estão no arquivo 'routes.ts' na raiz do projeto 
+## Todas as rotas estão no arquivo 'routes.ts' na raiz do projeto 
 
 1 - Permita que mais de um baralho seja criado em sua aplicação: 
   No arquivo 'routes' contém a rota '/decks' que é responsável por essa parte.
