@@ -26,8 +26,12 @@ class App {
                 serverSelectionTimeoutMS: 5000 // Adicionando timeout para conexão
             });
             console.log('Conexão com o banco de dados estabelecida com sucesso');
-        } catch (error) {
-            console.error('Erro ao conectar na base de dados:', error.message); // Melhorando a mensagem de erro
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Erro ao conectar na base de dados:', error.message); // Melhorando a mensagem de erro
+            } else {
+                console.error('Erro desconhecido ao conectar na base de dados');
+            }
         }
     }
 
@@ -40,8 +44,12 @@ class App {
                 ttl: 60
             });
             console.log('Cache configurado com sucesso');
-        } catch (error) {
-            console.error('Erro ao configurar o cache:', error.message); // Melhor tratamento de erro
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Erro ao configurar o cache:', error.message); // Melhor tratamento de erro
+            } else {
+                console.error('Erro desconhecido ao configurar o cache');
+            }
         }
     }
 
