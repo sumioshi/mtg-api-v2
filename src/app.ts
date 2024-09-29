@@ -22,29 +22,44 @@ class App {
 
     public async database() {
         try {
-            await mongoose.connect('mongodb://127.0.0.1:27017/cardsCommander');
-            console.log('Sucesso ao conectar com o banco de dados');
-        } catch (error) {
-            console.error('Não foi possível conectar na base de dados:', error);
+            await mongoose.connect('mongodb://127.0.0.1:27017/cardsCommander', {
+                serverSelectionTimeoutMS: 5000 // Adicionando timeout para conexão
+            });
+            console.log('Conexão com o banco de dados estabelecida com sucesso');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Erro ao conectar na base de dados:', error.message); // Melhorando a mensagem de erro
+            } else {
+                console.error('Erro desconhecido ao conectar na base de dados');
+            }
         }
     }
 
     public cacheSetup() {
-        this.cache = cacheManager.caching({
-            store: redisStore,  
-            host: 'localhost',
-            port: 6379,
-            ttl: 60 
-        });
+        try {
+            this.cache = cacheManager.caching({
+                store: redisStore,
+                host: 'localhost',
+                port: 6379,
+                ttl: 60
+            });
+            console.log('Cache configurado com sucesso');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Erro ao configurar o cache:', error.message); // Melhor tratamento de erro
+            } else {
+                console.error('Erro desconhecido ao configurar o cache');
+            }
+        }
     }
 
     public routes() {
         this.express.use((req, res, next) => {
-            req.cache = this.cache; 
+            req.cache = this.cache;
             next();
         });
         this.express.use(routes);
     }
 }
 
-export default new App().express;
+export default new App().express; 
