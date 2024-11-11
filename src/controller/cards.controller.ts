@@ -234,12 +234,21 @@ class CardsController {
             }
 
             const deck = await cardsService.createDeck(deckData.commander, deckData.cards, req.user!._id);
+
+            const deckContent = {
+                commander: deckData.commander,
+                cards: deckData.cards
+            };
+
+            fs.writeFileSync('cards.json', JSON.stringify(deckContent, null, 2), 'utf-8');
+            
             return res.status(201).json(deck);
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Erro ao importar deck' });
         }
     }
+
 
     async streamMagicCards(req: Request, res: Response) {
         try {

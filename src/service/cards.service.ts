@@ -57,10 +57,11 @@ class CardsService {
 
     async createDeck(commanderId: string, cardIds: string[], userId: string): Promise<IDeck> {
         const commander = await Card.findById(commanderId);
-        if (!commander || commander.type !== 'Legendary Creature — Human Rebel') {
-            throw new Error('Commander não encontrado ou tipo incorreto');
+        const cards = await Card.find({ _id: { $in: cardIds } });
+        console.log(`Cartas encontradas: ${cards.length}`); 
+        if (cards.length !== 99) {
+            throw new Error('Número incorreto de cartas. Um deck deve conter exatamente 99 cartas.');
         }
-
         const deck = new Deck({
             commanderId,
             cardIds,
@@ -69,11 +70,6 @@ class CardsService {
 
         return deck.save();
     }
-
-            // const cards = await Card.find({ _id: { $in: cardIds } });
-        // if (cards.length !== 99) {
-            // throw new Error('Número incorreto de cartas. Um deck deve conter exatamente 99 cartas.');
-        // }
     
     async getDeck(id: string): Promise<IDeck | null> {
         return Deck.findById(id).populate('commanderId cardIds');
