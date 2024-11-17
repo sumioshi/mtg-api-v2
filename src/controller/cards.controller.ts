@@ -6,6 +6,7 @@ import fs from 'fs';
 import { IUser } from '../schema/user.schema';
 import Deck from '../schema/deck.schema';
 import { Transform } from 'stream';
+import messageQueue from "../queues/messageQueue";
 
 interface ICardData {
     name: string;
@@ -219,40 +220,52 @@ class CardsController {
             return res.status(500).json({ message: 'Erro ao listar os baralhos do usuário' });
         }
     }
-
+      
     async importDeck(req: Request, res: Response) {
         try {
             const deckData = req.body;
-
-            if (!deckData.commander || !deckData.cards || deckData.cards.length !== 99) {
+    
+            if (!deckData.commanderId || !deckData.cardIds || deckData.cardIds.length !== 99) {
                 return res.status(400).json({ message: 'O deck deve ter um comandante e exatamente 99 cartas.' });
             }
-
-            const commander = await Card.findById(deckData.commander);
+    
+            const commander = await Card.findById(deckData.commanderId);
             if (!commander || commander.type !== 'Legendary Creature — Human Rebel') {
                 return res.status(400).json({ message: 'O comandante deve ser uma criatura lendária.' });
             }
-
-            const deck = await cardsService.createDeck(deckData.commander, deckData.cards, req.user!._id);
-
+    
+            const deck = await cardsService.createDeck(deckData.commanderId, deckData.cardIds, req.user!._id);
+    
             const deckContent = {
-                commander: deckData.commander,
-                cards: deckData.cards
+                commander: deckData.commanderId,
+                cards: deckData.cardIds
             };
-
             fs.writeFileSync('cards.json', JSON.stringify(deckContent, null, 2), 'utf-8');
-            
-            return res.status(201).json(deck);
+    
+            const isAdmin = req.user?.role === 'admin';
+            const priority = isAdmin ? 10 : 1; 
+    
+            await messageQueue.sendToQueue('deck_import_queue', { 
+                deckData, 
+                userId: req.user!._id 
+            }, { priority });
+    
+            await messageQueue.sendToQueue('deck_updates_queue', { 
+                message: 'Deck enviado para importação!', 
+                deckId: deck._id, 
+                userId: req.user!._id 
+            });
+    
+            return res.status(202).json({ message: 'Deck enviado para importação', deck });
         } catch (error) {
-            console.error(error);
+            console.error('Erro ao importar deck:', error);
             return res.status(500).json({ message: 'Erro ao importar deck' });
         }
     }
-
-
+    
     async streamMagicCards(req: Request, res: Response) {
         try {
-            const apiUrl = 'https://api.magicthegathering.io/v1/cards';
+            const apiUrl = 'https://api.magicthegathering.io/v1/cards?colors=w&pageSize=34';
 
             const axiosResponse = await axios({
                 url: apiUrl,

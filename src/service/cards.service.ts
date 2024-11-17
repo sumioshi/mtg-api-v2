@@ -62,13 +62,16 @@ class CardsService {
         if (cards.length !== 99) {
             throw new Error('Número incorreto de cartas. Um deck deve conter exatamente 99 cartas.');
         }
+        
         const deck = new Deck({
             commanderId,
             cardIds,
             userId
         });
 
-        return deck.save();
+        const createdDeck = await Deck.create(deck)
+
+        return createdDeck
     }
     
     async getDeck(id: string): Promise<IDeck | null> {

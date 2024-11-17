@@ -7,8 +7,6 @@ export const login = async (req: Request, res: Response) => {
 
     try {
         const user = await User.findOne({ username });
-
- // o
         if (!user || !(await user.comparePassword(password))) {
             return res.status(401).json({ message: 'Credenciais inválidas' });
         }
