@@ -1,62 +1,92 @@
-Abaixo está a documentação atualizada no `README.md` considerando todas as alterações e implementações feitas:
+Aqui está o **README.md** atualizado, agora mais intuitivo, completo e personalizado:
 
 ---
 
-# MTG Deck API - Documentação Completa
+# MTG Deck API - Gerencie Seus Decks de Commander
+
+### Documentação Completa
 
 ## Sumário
 
-1. [Descrição Geral](#descrição-geral)
-2. [Dependências e Configurações](#dependências-e-configurações)
-3. [Rotas Principais](#rotas-principais)
+1. [Visão Geral](#visão-geral)
+2. [Configurações e Dependências](#configurações-e-dependências)
+3. [Rotas da API](#rotas-da-api)
+   - [Autenticação](#autenticação)
+   - [Cards](#cards)
+   - [Decks](#decks)
 4. [Notificações em Tempo Real](#notificações-em-tempo-real)
-5. [Fila de Mensageria com RabbitMQ](#fila-de-mensageria-com-rabbitmq)
-6. [Utilização de Clusters](#utilização-de-clusters)
-7. [Como Rodar o Projeto](#como-rodar-o-projeto)
+5. [Gerenciamento de Tarefas com RabbitMQ](#gerenciamento-de-tarefas-com-rabbitmq)
+6. [Clusters e Melhorias de Desempenho](#clusters-e-melhorias-de-desempenho)
+7. [Como Rodar a Aplicação](#como-rodar-a-aplicação)
+8. [Testando com Insomnia](#testando-com-insomnia)
 
 ---
 
-## Descrição Geral
+## Visão Geral
 
-Esta API foi desenvolvida para gerenciar cards e decks de Magic: The Gathering no formato **Commander**. A aplicação suporta:
+Esta API foi criada para gerenciar decks e cards de Magic: The Gathering, com suporte ao formato **Commander**. Ela inclui funcionalidades como:
 
-- Criação e listagem de decks.
-- Importação de decks via JSON.
-- Notificações em tempo real com **WebSocket**.
-- Gerenciamento de filas de tarefas com **RabbitMQ**.
-- Cacheamento com **Redis**.
-- Execução com clusters para melhor performance.
-
----
-
-## Dependências e Configurações
-
-### Banco de Dados
-- **MongoDB**: Utilizado para persistir cards e decks.
-  - URL padrão: `mongodb://localhost:27017/mtg-api`.
-
-### Mensageria
-- **RabbitMQ**: Para processamento de mensagens.
-  - URL padrão: `amqp://localhost`.
-
-### Cache
-- **Redis**: Utilizado para cachear dados.
-  - URL padrão: `redis://localhost`.
-
-### Socket.IO
-- Configurado para notificar usuários em tempo real.
+- Criação, listagem e importação de decks.
+- Validação de decks para garantir conformidade com as regras do Commander.
+- Integração com **WebSocket** para notificações em tempo real.
+- Gerenciamento de filas com **RabbitMQ** para tarefas assíncronas.
+- Cache com **Redis** e suporte a clusters para alto desempenho.
 
 ---
 
-## Rotas Principais
+## Configurações e Dependências
+
+### Pré-requisitos
+
+1. **Node.js**: v14+  
+2. **MongoDB**: Para armazenamento de dados.  
+3. **Redis**: Para cache de dados.  
+4. **RabbitMQ**: Para gerenciamento de mensagens e tarefas assíncronas.  
+
+### Configuração de Ambiente
+
+Certifique-se de que os seguintes serviços estão rodando antes de iniciar a aplicação:
+
+1. MongoDB:
+   ```bash
+   mongod
+   ```
+2. Redis:
+   ```bash
+   redis-server
+   ```
+3. RabbitMQ:
+   ```bash
+   docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+   ```
+
+---
+
+## Rotas da API
 
 ### Autenticação
 
-- **`POST /login`**  
-  Retorna um token JWT para autenticação.
-
 - **`POST /register`**  
-  Registra um novo usuário.
+  Cria um novo usuário.  
+  **Body (JSON)**:
+  ```json
+  {
+      "username": "exemplo",
+      "password": "senha123"
+  }
+  ```
+
+- **`POST /login`**  
+  Gera um token JWT para autenticação.  
+  **Body (JSON)**:
+  ```json
+  {
+      "username": "exemplo",
+      "password": "senha123"
+  }
+  ```
+
+---
 
 ### Cards
 
@@ -64,262 +94,139 @@ Esta API foi desenvolvida para gerenciar cards e decks de Magic: The Gathering n
   Retorna todos os cards cadastrados.
 
 - **`POST /cards-create`**  
-  Cria um novo card (necessário autenticação).
+  Cria um novo card (necessário autenticação com token JWT).  
+  **Body (JSON)**:
+  ```json
+  {
+      "name": "Card Name",
+      "type": "Card Type"
+  }
+  ```
 
 - **`GET /inserir-cards`**  
-  Insere cards diretamente da API externa do Magic: The Gathering (necessário autenticação).
+  Insere cards diretamente da API oficial de Magic: The Gathering (necessário autenticação).
+
+---
 
 ### Decks
 
 - **`POST /decks`**  
-  Cria um novo deck (necessário autenticação).
-
-- **`GET /decks/:id`**  
-  Retorna detalhes de um deck específico (necessário autenticação).
+  Cria um novo deck (necessário autenticação).  
+  **Body (JSON)**:
+  ```json
+  {
+      "commanderId": "id_do_commander",
+      "cardIds": ["id_card_1", "id_card_2", "..."]
+  }
+  ```
 
 - **`GET /my-decks`**  
-  Retorna todos os decks do usuário logado (necessário autenticação e implementa cache).
+  Retorna todos os decks do usuário logado (utiliza cache para melhorar o desempenho).
 
 - **`POST /decks/import`**  
-  Importa decks no formato JSON, validando regras do formato Commander (utiliza filas com RabbitMQ).
+  Importa decks via JSON e valida as regras do formato Commander.  
+  **Body (JSON)**:
+  ```json
+  {
+      "commanderId": "id_do_commander",
+      "cardIds": ["id_card_1", "id_card_2", "..."]
+  }
+  ```
 
 - **`PUT /decks/:id`**  
-  Atualiza informações de um deck existente (necessário autenticação).
+  Atualiza um deck existente.  
+  **Body (JSON)**:
+  ```json
+  {
+      "commanderId": "novo_commander_id",
+      "cardIds": ["novo_card_id_1", "novo_card_id_2", "..."]
+  }
+  ```
 
 - **`GET /decks/all`**  
-  Lista todos os decks (apenas para administradores).
-
-### Notificações
-
-- **`POST /test-notification`**  
-  Envia uma notificação de teste para um usuário específico.
+  Retorna todos os decks (apenas para administradores).
 
 ---
 
 ## Notificações em Tempo Real
 
-A integração com **Socket.IO** permite que os usuários recebam notificações sobre eventos como importação de decks. Para testar:
+A API integra o **Socket.IO** para enviar notificações em tempo real aos usuários, como o status de importação de decks.
 
-1. Abra o arquivo `test-socket.html`.
-2. Insira o **User ID** no campo apropriado.
+### Como Testar
+
+1. Abra o arquivo `test-socket.html` no navegador.
+2. Insira o **User ID** fornecido após o login.
 3. Clique em "Connect".
-4. As notificações aparecerão na interface.
+4. Aguarde notificações em tempo real quando eventos forem disparados no backend.
 
 ---
 
-## Fila de Mensageria com RabbitMQ
+## Gerenciamento de Tarefas com RabbitMQ
 
-A API utiliza filas para processar tarefas assíncronas, como a importação de decks. Mensagens são enviadas para as seguintes filas:
+Mensagens são enviadas para filas para processamento assíncrono:
 
-- **`deck_import_queue`**: Para processar importações de decks.
-- **`deck_updates_queue`**: Para enviar atualizações de status após o processamento.
+- **`deck_import_queue`**: Importação de decks.  
+- **`deck_updates_queue`**: Atualizações de status.  
 
----
-
-## Utilização de Clusters
-
-Clusters são usados para distribuir a carga em múltiplos núcleos da CPU, melhorando a performance da aplicação. O número de clusters é baseado no número de CPUs disponíveis.
+Configuração no RabbitMQ para diferentes prioridades foi implementada.
 
 ---
 
-## Como Rodar o Projeto
+## Clusters e Melhorias de Desempenho
 
-### 1. Clonar o Repositório
-```bash
-git clone <URL_DO_REPOSITORIO>
-```
+- **Clusters**: O aplicativo usa todos os núcleos de CPU disponíveis para aumentar a capacidade de requisições.
+- **Cache**: Melhorias na listagem de decks com Redis para reduzir o tempo de resposta.
 
-### 2. Instalar Dependências
-```bash
-npm install
-```
+---
 
-### 3. Iniciar Serviços
-- MongoDB:
-  ```bash
-  mongod
-  ```
-- Redis:
-  ```bash
-  redis-server
-  ```
-- RabbitMQ:
-  ```bash
-  docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
-  ```
+## Como Rodar a Aplicação
 
-### 4. Rodar a Aplicação
-Para rodar em modo cluster:
-```bash
-npm start
-```
-
-### 5. Exemplos de Rotas e Uso no Insomnia
-
-#### 5.1 Importação de Deck (`POST /decks/import`)
-
-##### Descrição:
-Importa um deck no formato JSON e valida as regras do formato Commander. O processamento ocorre de forma assíncrona com notificações em tempo real.
-
-##### Exemplo de Configuração no Insomnia:
-
-1. **Método**: `POST`
-2. **URL**: `http://localhost:3001/decks/import`
-3. **Headers**:
-   ```json
-   {
-       "Authorization": "Bearer <SEU_TOKEN_JWT>",
-       "Content-Type": "application/json"
-   }
+1. Clone o repositório:
+   ```bash
+   git clone <URL_DO_REPOSITORIO>
+   cd <PASTA_DO_REPOSITORIO>
    ```
-4. **Body (JSON)**:
-   ```json
-   {
-       "commanderId": "674b76bdd5a9a4495f0361f2",
-       "cardIds": [
-           "674b76bdd5a9a4495f0361cb",
-           "674b76bdd5a9a4495f0361cf",
-           "674b76bdd5a9a4495f0361d3",
-           "674b76bdd5a9a4495f0361d7",
-           "674b76bdd5a9a4495f0361da",
-           "674b76bdd5a9a4495f0361de",
-           "674b76bdd5a9a4495f0361e1",
-           "674b76bdd5a9a4495f0361e5",
-           "674b76bdd5a9a4495f0361e8",
-           "674b76bdd5a9a4495f0361eb",
-           "674b76bdd5a9a4495f0361ee",
-           "674b76bdd5a9a4495f0361f5",
-           "674b76bdd5a9a4495f0361f8",
-           "674b76bdd5a9a4495f0361fb",
-           "674b76bdd5a9a4495f0361ff",
-           "674b76bdd5a9a4495f036202",
-           "674b76bdd5a9a4495f036205",
-           "674b76bdd5a9a4495f036208",
-           "674b76bdd5a9a4495f03620c",
-           "674b76bdd5a9a4495f03620f",
-           "674b76bdd5a9a4495f036212",
-           "674b76bdd5a9a4495f036216",
-           "674b76bdd5a9a4495f036219",
-           "674b76bdd5a9a4495f03621c",
-           "674b76bdd5a9a4495f03621f",
-           "674b76bdd5a9a4495f036222",
-           "674b76bdd5a9a4495f036225",
-           "674b76bdd5a9a4495f036228",
-           "674b76bdd5a9a4495f03622c",
-           "674b76bdd5a9a4495f036230",
-           "674b76bdd5a9a4495f036234",
-           "674b76bdd5a9a4495f036238",
-           "674b76bdd5a9a4495f03623c",
-           "674b76bdd5a9a4495f03623f",
-           "674b76bdd5a9a4495f036243",
-           "674b76bdd5a9a4495f036246",
-           "674b76bdd5a9a4495f036249",
-           "674b76bdd5a9a4495f03624c",
-           "674b76bdd5a9a4495f036250",
-           "674b76bdd5a9a4495f036254",
-           "674b76bdd5a9a4495f036258",
-           "674b76bdd5a9a4495f03625c",
-           "674b76bdd5a9a4495f036260",
-           "674b76bdd5a9a4495f036263",
-           "674b76bdd5a9a4495f036267",
-           "674b76bdd5a9a4495f03626a",
-           "674b76bdd5a9a4495f03626d",
-           "674b76bdd5a9a4495f036271",
-           "674b76bdd5a9a4495f036274",
-           "674b76bdd5a9a4495f036278",
-           "674b76bdd5a9a4495f03627b",
-           "674b76bdd5a9a4495f03627e",
-           "674b76bdd5a9a4495f036282",
-           "674b76bdd5a9a4495f036286",
-           "674b76bdd5a9a4495f036289",
-           "674b76bdd5a9a4495f03628d",
-           "674b76bdd5a9a4495f036291",
-           "674b76bdd5a9a4495f036294",
-           "674b76bed5a9a4495f036298",
-           "674b76bed5a9a4495f03629c",
-           "674b76bed5a9a4495f03629f",
-           "674b76bed5a9a4495f0362a3",
-           "674b76bed5a9a4495f0362a6",
-           "674b76bed5a9a4495f0362a9",
-           "674b76bed5a9a4495f0362ac",
-           "674b76bed5a9a4495f0362af",
-           "674b76bed5a9a4495f0362b2",
-           "674b76bed5a9a4495f0362b5",
-           "674b76bed5a9a4495f0362b8",
-           "674b76bed5a9a4495f0362bb",
-           "674b76bed5a9a4495f0362be",
-           "674b76bed5a9a4495f0362c1",
-           "674b76bed5a9a4495f0362c4",
-           "674b76bed5a9a4495f0362c7",
-           "674b76bed5a9a4495f0362ca",
-           "674b76bed5a9a4495f0362cd",
-           "674b76bed5a9a4495f0362d0",
-           "674b76bed5a9a4495f0362d3",
-           "674b76bed5a9a4495f0362d6",
-           "674b76bed5a9a4495f0362d9",
-           "674b76bed5a9a4495f0362dc",
-           "674b76bed5a9a4495f0362df",
-           "674b76bed5a9a4495f0362e2",
-           "674b76bed5a9a4495f0362e5",
-           "674b76bed5a9a4495f0362e8",
-           "674b76bed5a9a4495f0362ec",
-           "674b76bed5a9a4495f0362ef",
-           "674b76bed5a9a4495f0362f2",
-           "674b76bed5a9a4495f0362f5",
-           "674b76bed5a9a4495f0362f8",
-           "674b76bed5a9a4495f0362fb",
-           "674b76bed5a9a4495f0362fe",
-           "674b76bed5a9a4495f036301",
-           "674b76bed5a9a4495f036304",
-           "674b76bed5a9a4495f036307",
-           "674b76bed5a9a4495f03630a",
-           "674b76bed5a9a4495f03630f",
-           "674b76bed5a9a4495f036313",
-           "674b76bed5a9a4495f036316"
-       ]
-   }
+
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
+
+3. Inicie a aplicação:
+   ```bash
+   npm start
    ```
 
 ---
 
-#### 5.2 Registro de Usuário (`POST /register`)
+## Testando com Insomnia
 
-##### Exemplo:
+### Importar Deck (`POST /decks/import`)
 
-1. **Método**: `POST`
-2. **URL**: `http://localhost:3001/register`
-3. **Body (JSON)**:
-   ```json
-   {
-       "username": "rodrigosumioshi",
-       "password": "rodrigosumioshi"
-   }
-   ```
-
----
-
-#### 6.3 Login de Usuário (`POST /login`)
-
-##### Exemplo:
-
-1. **Método**: `POST`
-2. **URL**: `http://localhost:3001/login`
-3. **Body (JSON)**:
-   ```json
-   {
-       "username": "rodrigosumioshi",
-       "password": "rodrigosumioshi"
-   }
-   ```
----
-
-## Testando a API
-
-Use ferramentas como **Postman** ou **Insomnia** para testar as rotas. Certifique-se de adicionar o token JWT no cabeçalho das requisições.
-
-Exemplo de cabeçalho:
+**Headers**:
 ```json
-Authorization: Bearer <SEU_TOKEN_JWT>
+{
+    "Authorization": "Bearer <SEU_TOKEN>",
+    "Content-Type": "application/json"
+}
+```
+
+**Body**:
+```json
+{
+    "commanderId": "id_do_commander",
+    "cardIds": ["id_card_1", "id_card_2", "..."]
+}
+```
+
+### Registro de Usuário (`POST /register`)
+
+**Body**:
+```json
+{
+    "username": "exemplo",
+    "password": "senha123"
+}
 ```
 
 ---
