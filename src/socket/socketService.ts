@@ -1,59 +1,81 @@
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import { Server as HttpServer } from 'http';
 
 class SocketService {
-    private io: Server | null = null;
+    public io: Server | null = null;
+    private connectedUsers: Map<string, string> = new Map(); // userId -> socketId
 
-    initialize(server: any) {
+    initialize(httpServer: HttpServer) {
         if (this.io) {
             console.log('Socket.IO já inicializado');
             return;
         }
 
-        this.io = new Server(server, {
+        this.io = new Server(httpServer, {
             cors: {
                 origin: '*',
                 methods: ['GET', 'POST'],
             },
+            transports: ['websocket', 'polling'],
+            pingTimeout: 60000,
+            pingInterval: 25000,
         });
 
-        this.io.on('connection', (socket) => {
-            console.log(`Usuário conectado: ${socket.id}`);
-
-            socket.on('join', (data) => {
-                try {
-                    console.log('Evento join recebido:', data);
-
-                    if (!data || !data.userId) {
-                        console.error('Dados inválidos recebidos no evento join:', data);
-                        socket.emit('error', { message: 'Dados inválidos para o evento join' });
-                        return;
-                    }
-
-                    console.log(`Usuário ${data.userId} entrou no canal.`);
-                    socket.join(data.userId); // Adiciona o usuário à sala
-                    socket.emit('join_success', { message: `Bem-vindo, usuário ${data.userId}` }); // Envia confirmação
-                } catch (error) {
-                    console.error('Erro no evento join:', error);
-                    socket.emit('error', { message: 'Erro interno no servidor' });
-                }
-            });
-
-            socket.on('disconnect', (reason) => {
-                console.log(`Usuário desconectado: ${socket.id}. Motivo: ${reason}`);
-            });
-        });
-
+        this.setupEventHandlers();
         console.log('Socket.IO inicializado');
     }
 
-    notifyUser(userId: string, message: string) {
-        if (this.io) {
-            console.log(`Enviando notificação para ${userId}: ${message}`);
-            this.io.to(userId).emit('notification', message);
-        } else {
-            console.error('Socket.IO não inicializado');
-        }
+    private setupEventHandlers() {
+        if (!this.io) return;
+
+        this.io.on('connection', (socket: Socket) => {
+            console.log(`Usuário conectado: ${socket.id}`);
+
+            socket.on('join', (data: { userId: string }) => {
+                if (!data?.userId) {
+                    console.warn(`Socket ${socket.id} tentou se conectar sem fornecer userId`);
+                    return;
+                }
+
+                this.connectedUsers.set(data.userId, socket.id);
+                socket.join(data.userId);
+                console.log(`Usuário ${data.userId} conectado no socket ${socket.id}`);
+            });
+
+            socket.on('disconnect', () => {
+                this.connectedUsers.forEach((socketId, userId) => {
+                    if (socketId === socket.id) {
+                        this.connectedUsers.delete(userId);
+                        console.log(`Usuário ${userId} desconectado do socket ${socket.id}`);
+                    }
+                });
+            });
+
+            socket.on('error', (error) => {
+                console.error(`Erro no socket ${socket.id}:`, error);
+            });
+        });
     }
+
+    notifyUser(userId: string, message: any) {
+        if (!this.io) {
+            console.error('Socket.IO não inicializado. Notificação abortada.');
+            return;
+        }
+    
+        try {
+            const socketId = this.connectedUsers.get(userId);
+            if (socketId) {
+                console.log(`Emitindo notificação para socketId ${socketId} do usuário ${userId}`);
+                this.io.to(socketId).emit('notification', message);
+                console.log('Conteúdo da notificação:', message);
+            } else {
+                console.warn(`Usuário ${userId} não conectado. Notificação perdida.`);
+            }
+        } catch (error) {
+            console.error('Erro ao enviar notificação:', error);
+        }
+    }    
 }
 
 export default new SocketService();

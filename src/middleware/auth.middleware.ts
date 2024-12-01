@@ -6,20 +6,29 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
     const token = req.header('Authorization')?.split(' ')[1];
 
     if (!token) {
+        console.error('Token não fornecido.');
         return res.status(401).json({ message: 'Access Denied' });
     }
 
     try {
-        const decoded: any = jwt.verify(token, 'your_jwt_secret');
-        const user = await User.findById(decoded.id);
+        console.log('Token recebido:', token);
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'default_secret');        console.log('Token decodificado:', decoded);
 
+        const user = await User.findById(decoded.id);
         if (!user) {
+            console.error('Usuário não encontrado para o ID:', decoded.id);
             return res.status(401).json({ message: 'User not found' });
         }
 
         req.user = user;
         next();
-    } catch (err) {
+    } catch (err: any) {
+        console.error('Erro ao verificar token:', err.message);
+
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Token expired' });
+        }
+
         return res.status(400).json({ message: 'Invalid Token' });
     }
 };

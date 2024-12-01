@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../schema/user.schema'; 
+import User from '../schema/user.schema';
 
 export const login = async (req: Request, res: Response) => {
     const { username, password } = req.body;
@@ -11,7 +11,11 @@ export const login = async (req: Request, res: Response) => {
             return res.status(401).json({ message: 'Credenciais inválidas' });
         }
 
-        const token = jwt.sign({ id: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: user._id },
+            process.env.JWT_SECRET || 'default_secret',
+            { expiresIn: '1h' }
+        );
 
         return res.status(200).json({ token });
     } catch (error) {
@@ -23,13 +27,17 @@ export const login = async (req: Request, res: Response) => {
 export const register = async (req: Request, res: Response) => {
     const { username, password, role } = req.body;
 
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Usuário e senha são obrigatórios.' });
+    }
+
     try {
         const userExist = await User.findOne({ username });
 
         if (userExist) {
             return res.status(400).json({ message: 'Usuário já existe' });
         }
-        
+
         const newUser = new User({ username, password, role: role || 'user' });
         await newUser.save();
 

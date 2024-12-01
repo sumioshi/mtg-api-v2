@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTG Deck Import Notifications</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+        }
+
+        .card-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-radius: 12px 12px 0 0 !important;
+        }
+
+        #notifications {
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 8px;
+            background-color: #ffffff;
+            padding: 15px;
+            scrollbar-width: thin;
+        }
+
+        #notifications::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #notifications::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        #notifications::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .notification {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            border-left-color: #198754;
+            background-color: #d1e7dd;
+        }
+
+        .notification.error {
+            border-left-color: #dc3545;
+            background-color: #f8d7da;
+        }
+
+        .notification.warning {
+            border-left-color: #ffc107;
+            background-color: #fff3cd;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+
+        .timestamp {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        #userId {
+            border-radius: 6px;
+            padding: 10px 15px;
+            font-size: 1rem;
+        }
+
+        .btn-connect {
+            padding: 10px 20px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-connect:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5 mb-5">
+        <div class="card">
+            <div class="card-header p-4">
+                <h1 class="text-center mb-0">
+                    <i class="bi bi-bell"></i> MTG Deck Import Notifications
+                </h1>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-8 mb-3 mb-md-0">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input 
+                                type="text" 
+                                id="userId" 
+                                class="form-control"
+                                placeholder="Enter User ID"
+                            />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary w-100 btn-connect" onclick="connectSocket()">
+                            <i class="bi bi-plug"></i> Connect
+                        </button>
+                    </div>
+                </div>
+
+                <div id="status" class="alert alert-secondary text-center mb-4">
+                    <i class="bi bi-info-circle"></i> Not connected
+                </div>
+
+                <div class="position-relative">
+                    <h2 class="mb-3">
+                        <i class="bi bi-list-ul"></i> Notifications History
+                    </h2>
+                    <button class="btn btn-outline-secondary btn-sm clear-btn" onclick="clearNotifications()">
+                        <i class="bi bi-trash"></i> Clear
+                    </button>
+                    <div id="notifications">
+                        <p class="text-muted text-center py-4">No notifications yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+
+        function connectSocket() {
+            const userId = document.getElementById('userId').value.trim();
+            if (!userId) {
+                showError('Please enter your User ID');
+                return;
+            }
+
+            if (socket) socket.disconnect();
+
+            updateStatus('Connecting...', 'info');
+
+            socket = io('http://localhost:3001', {
+                transports: ['websocket', 'polling'],
+                reconnection: true,
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000,
+                reconnectionAttempts: maxReconnectAttempts
+            });
+
+            socket.on('connect', () => {
+                console.log('Connected to server');
+                updateStatus('Connected', 'success');
+                reconnectAttempts = 0;
+                socket.emit('join', { userId });
+                
+                addNotification({
+                    message: 'Connected to notification service',
+                    type: 'success'
+                });
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error('Connection error:', error);
+                reconnectAttempts++;
+                updateStatus(`Connection error (Attempt ${reconnectAttempts}/${maxReconnectAttempts})`, 'danger');
+                
+                if (reconnectAttempts >= maxReconnectAttempts) {
+                    addNotification({
+                        message: 'Failed to connect after multiple attempts',
+                        type: 'error'
+                    });
+                }
+            });
+
+            socket.on('notification', (data) => {
+                try {
+                    const parsedData = typeof data === 'string' ? JSON.parse(data) : data;
+                    addNotification({
+                        message: parsedData.deckId 
+                            ? `${parsedData.message} (Deck ID: ${parsedData.deckId})`
+                            : parsedData.message,
+                        type: 'success',
+                        timestamp: new Date()
+                    });
+                    console.log('Notification received:', parsedData);
+                } catch (error) {
+                    console.error('Error parsing notification:', error);
+                    addNotification({
+                        message: 'Invalid notification format received',
+                        type: 'error',
+                        timestamp: new Date()
+                    });
+                }
+            });
+
+            socket.on('disconnect', () => {
+                updateStatus('Disconnected', 'warning');
+                console.log('Disconnected from server');
+                
+                addNotification({
+                    message: 'Disconnected from notification service',
+                    type: 'warning',
+                    timestamp: new Date()
+                });
+            });
+
+            socket.on('error', (error) => {
+                console.error('Socket error:', error);
+                updateStatus('Socket error', 'danger');
+                
+                addNotification({
+                    message: 'Error in connection',
+                    type: 'error',
+                    timestamp: new Date()
+                });
+            });
+        }
+
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            const icons = {
+                success: 'bi-check-circle',
+                danger: 'bi-exclamation-triangle',
+                warning: 'bi-exclamation-circle',
+                info: 'bi-info-circle'
+            };
+            
+            statusDiv.className = `alert alert-${type} text-center`;
+            statusDiv.innerHTML = `<i class="bi ${icons[type]}"></i> ${message}`;
+        }
+
+        function addNotification({ message, type = 'info', timestamp = new Date() }) {
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = `notification ${type}`;
+            
+            const messageContent = document.createElement('div');
+            messageContent.textContent = message;
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'timestamp';
+            timeDiv.textContent = timestamp.toLocaleTimeString();
+            
+            notificationDiv.appendChild(messageContent);
+            notificationDiv.appendChild(timeDiv);
+
+            const notificationsContainer = document.getElementById('notifications');
+            if (notificationsContainer.querySelector('p')) {
+                notificationsContainer.innerHTML = '';
+            }
+            notificationsContainer.prepend(notificationDiv);
+        }
+
+        function clearNotifications() {
+            const notificationsContainer = document.getElementById('notifications');
+            notificationsContainer.innerHTML = '<p class="text-muted text-center py-4">No notifications yet</p>';
+        }
+
+        function showError(message) {
+            addNotification({
+                message,
+                type: 'error',
+                timestamp: new Date()
+            });
+        }
+
+        // Keyboard shortcut to connect (Enter key in userId input)
+        document.getElementById('userId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                connectSocket();
+            }
+        });
+    </script>
+</body>
+</html>
