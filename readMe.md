@@ -1,4 +1,3 @@
-Aqui está o **README.md** atualizado, agora mais intuitivo, completo e personalizado:
 
 ---
 
