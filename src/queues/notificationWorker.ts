@@ -1,12 +1,10 @@
 import messageQueue from '../queues/messageQueue';
 import socketService from '../socket/socketService';
 
-async function processNotification(msg: any) {
+async function processNotification(msg) {
     try {
         const { userId, message } = JSON.parse(msg.content.toString());
-
         socketService.notifyUser(userId, message);
-
         messageQueue.acknowledgeMessage(msg);
     } catch (error) {
         console.error('Erro ao processar notificação:', error);
